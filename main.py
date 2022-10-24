@@ -1,16 +1,12 @@
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image
 import findbest
+from shapely.geometry.polygon import Polygon
+from shapely.geometry import Point
 from timeit import default_timer as timer
-
-IMG_HEIGHT = 10000
-IMG_WIDTH = 10000
-CANVAS = Image.new(mode="RGB", size=(IMG_WIDTH, IMG_HEIGHT))
+from imageconstruct import *
 
 def GetRangeRgb(image, pxfrom, pxto, axis, stable):
     temp = []
-
-
-
     if axis == "x":
         for i in (range (pxfrom, pxto)):
             temp.append(image.getpixel((i, stable)))
@@ -31,18 +27,13 @@ def UpdateCoordinatesFromBestSide(anchor, image, val):
         image.topleft = [anchor.bottomleft[0] - image.image.width + val[1], anchor.bottomleft[1]]
     if val[2] == 't':
         image.topleft = [anchor.topleft[0] - image.image.width + val[1], anchor.topleft[1]]
-
-
-def PlaceOnCanvas(image):
-    CANVAS.paste(image.image, tuple(image.topleft))
-
-
-
-
+    image.UpdatePosition()
 
 class pieceImage:
     def __init__(self, image, anchor=False):
         self.image = Image.open(image)
+        self.name = image
+        self.id = id(self)
 
         self.image.top_rgb = GetRangeRgb(self.image, 0, self.image.width, "x", 0) #scrape top
         self.image.bottom_rgb = GetRangeRgb(self.image, 0, self.image.width, "x", self.image.height-1) #scrape bottom
@@ -55,6 +46,7 @@ class pieceImage:
             self.bottomleft = [self.topleft[0], self.topleft[1] + self.image.height]
             self.topright = [self.topleft[0] + self.image.width, self.topleft[1]]
             self.bottomright = [self.topright[0], self.bottomleft[1]]
+            TAKEN_POINTS_POLYS.append(Polygon([(self.topleft),(self.bottomleft),(self.topright),(self.bottomright)]))        
         else:
             self.topleft = ["False", "False"]
 
@@ -62,19 +54,19 @@ class pieceImage:
             self.bottomleft = [self.topleft[0], self.topleft[0] + self.image.height]
             self.topright = [self.topleft[0] + self.image.width, self.topleft[0]]
             self.bottomright = [self.topright[0], self.bottomleft[1]]
+            TAKEN_POINTS_POLYS.append(Polygon([(self.topleft),(self.bottomleft),(self.topright),(self.bottomright)]))
 
 
-start = timer()
+
 
 one = pieceImage("images/1.png", "anchor")
 two = pieceImage("images/2.png")
+three = pieceImage("images/3.png")
 
 onetwo = findbest.FindBestAll(one, two)
 
 
 
-elapsed_time = round(timer(), 2)
-print("Matching and initialization of both images took", elapsed_time, "seconds")
 
 
 print(onetwo)
@@ -82,7 +74,15 @@ print(onetwo)
 UpdateCoordinatesFromBestSide(one, two, onetwo)
 two.UpdatePosition()
 
+twothree = findbest.FindBestAll(two, three, True)
+UpdateCoordinatesFromBestSide(two, three, twothree)
+three.UpdatePosition()
+
 
 PlaceOnCanvas(one)
 PlaceOnCanvas(two)
+PlaceOnCanvas(three)
+start = timer()
 CANVAS.save("canvas.png")
+elapsed_time = round(timer(), 2)
+print("Saving canvas took", elapsed_time, "seconds")
