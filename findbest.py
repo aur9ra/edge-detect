@@ -56,8 +56,8 @@ def FindBestMatch(image1, image2, currentSide, anchorImg, placeImg, debug=False)
 
         if debug:
             if not imageconstruct.ValidPlacement(tempTopLeft, placeImg.image.width, placeImg.image.height):
-                print("invalid placement", currentSide)
-                print(tempTopLeft,"is temptopleft")
+                #print("invalid placement", currentSide)
+                #print(tempTopLeft,"is temptopleft")
                 imageconstruct.PlacePointOnCanvas(tempTopLeft)
             else:
                 imageconstruct.PlacePointOnCanvas(tempTopLeft, 2)
@@ -66,13 +66,13 @@ def FindBestMatch(image1, image2, currentSide, anchorImg, placeImg, debug=False)
         similarity_score_temp = SimilarityOfRange(image1[i:i+len(image2)], image2)
         similarity_history.append(similarity_score_temp)
 
-        if similarity_score_temp > similarity_max[0]:
+        if similarity_score_temp > similarity_max[0] and imageconstruct.ValidPlacement(tempTopLeft, placeImg.image.width, placeImg.image.height):
             similarity_max[0] = similarity_score_temp
             similarity_max[1] = i
 
         i += 1
 
-    if debug:
+    if debug and True == False:
         title = "Line graph for "+currentSide+" side of "+anchorImg.name
         x = np.arange(0,i)
         y = similarity_history

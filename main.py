@@ -20,13 +20,13 @@ def GetRangeRgb(image, pxfrom, pxto, axis, stable):
 
 def UpdateCoordinatesFromBestSide(anchor, image, val):
     if val[2] == 'r':
-        image.topleft = [anchor.topright[0], (anchor.topright[1] - image.image.height) + val[1]]
+        image.topleft = [anchor.topright[0], anchor.topleft[1] - image.image.height + val[1]]
     if val[2] == 'l':
         image.topleft = [anchor.topleft[0] - image.image.width, anchor.topleft[1] - image.image.height + val[1]]
     if val[2] == 'b':
         image.topleft = [anchor.bottomleft[0] - image.image.width + val[1], anchor.bottomleft[1]]
     if val[2] == 't':
-        image.topleft = [anchor.topleft[0] - image.image.width + val[1], anchor.topleft[1]]
+        image.topleft = [anchor.topleft[0] - image.image.width + val[1], anchor.topleft[1] - image.image.height]
     image.UpdatePosition()
 
 class pieceImage:
@@ -43,18 +43,23 @@ class pieceImage:
 
         if anchor:
             self.topleft = [int(IMG_WIDTH/2 - self.image.width / 2), int(IMG_HEIGHT/2 - self.image.height / 2)]
+            PlacePointOnCanvas(self.topleft)
             self.bottomleft = [self.topleft[0], self.topleft[1] + self.image.height]
+            PlacePointOnCanvas(self.bottomleft)
             self.topright = [self.topleft[0] + self.image.width, self.topleft[1]]
+            PlacePointOnCanvas(self.topright)
             self.bottomright = [self.topright[0], self.bottomleft[1]]
+            PlacePointOnCanvas(self.bottomright)
             TAKEN_POINTS_POLYS.append(Polygon([(self.topleft),(self.bottomleft),(self.topright),(self.bottomright)]))        
         else:
             self.topleft = ["False", "False"]
 
     def UpdatePosition(self):
-            self.bottomleft = [self.topleft[0], self.topleft[0] + self.image.height]
-            self.topright = [self.topleft[0] + self.image.width, self.topleft[0]]
+            self.bottomleft = [self.topleft[0], self.topleft[1] + self.image.height]
+            self.topright = [self.topleft[0] + self.image.width, self.topleft[1]]
             self.bottomright = [self.topright[0], self.bottomleft[1]]
             TAKEN_POINTS_POLYS.append(Polygon([(self.topleft),(self.bottomleft),(self.topright),(self.bottomright)]))
+            print("Appending to TAKEN_POINTS_POLYS for",self.name)
 
 
 
@@ -62,26 +67,24 @@ class pieceImage:
 one = pieceImage("images/1.png", "anchor")
 two = pieceImage("images/2.png")
 three = pieceImage("images/3.png")
+four = pieceImage("images/4.png")
 
 onetwo = findbest.FindBestAll(one, two)
-
-
-
-
-
 print(onetwo)
-
 UpdateCoordinatesFromBestSide(one, two, onetwo)
-two.UpdatePosition()
 
-twothree = findbest.FindBestAll(two, three, True)
+twothree = findbest.FindBestAll(two, three)
 UpdateCoordinatesFromBestSide(two, three, twothree)
-three.UpdatePosition()
+print(twothree)
 
+threefour = findbest.FindBestAll(three, four)
+UpdateCoordinatesFromBestSide(three, four, threefour)
+print(threefour)
 
-PlaceOnCanvas(one)
-PlaceOnCanvas(two)
-PlaceOnCanvas(three)
+PlaceOnCanvas(one, True)
+PlaceOnCanvas(two, True)
+PlaceOnCanvas(three, True)
+PlaceOnCanvas(four, True)
 start = timer()
 CANVAS.save("canvas.png")
 elapsed_time = round(timer(), 2)

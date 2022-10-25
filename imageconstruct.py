@@ -8,8 +8,7 @@ CANVAS = Image.new(mode="RGB", size=(IMG_WIDTH, IMG_HEIGHT))
 
 TAKEN_POINTS_POLYS = []
 
-def PlaceOnCanvas(image):
-    CANVAS.paste(image.image, tuple(image.topleft))
+
 
 def ValidPlacement(origin, width, height):
     for polygon in TAKEN_POINTS_POLYS:
@@ -24,3 +23,11 @@ pointImageTwo = Image.open("images/point2.png")
 
 def PlacePointOnCanvas(coords, style=1):
     CANVAS.paste(pointImageTwo if style==2 else pointImage, tuple(coords))
+
+def PlaceOnCanvas(image, debug=False):
+    CANVAS.paste(image.image, tuple(image.topleft))
+    if debug:
+        PlacePointOnCanvas(image.topleft)
+        PlacePointOnCanvas(image.bottomleft)
+        PlacePointOnCanvas(image.topright)
+        PlacePointOnCanvas(image.bottomright)
