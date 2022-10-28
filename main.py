@@ -5,6 +5,8 @@ from shapely.geometry import Point
 from timeit import default_timer as timer
 from imageconstruct import *
 
+IMAGE_PADDING = 50 #px
+
 def GetRangeRgb(image, pxfrom, pxto, axis, stable):
     temp = []
     if axis == "x":
@@ -43,14 +45,15 @@ class pieceImage:
 
         if anchor:
             self.topleft = [int(IMG_WIDTH/2 - self.image.width / 2), int(IMG_HEIGHT/2 - self.image.height / 2)]
-            PlacePointOnCanvas(self.topleft)
             self.bottomleft = [self.topleft[0], self.topleft[1] + self.image.height]
-            PlacePointOnCanvas(self.bottomleft)
             self.topright = [self.topleft[0] + self.image.width, self.topleft[1]]
-            PlacePointOnCanvas(self.topright)
             self.bottomright = [self.topright[0], self.bottomleft[1]]
-            PlacePointOnCanvas(self.bottomright)
-            TAKEN_POINTS_POLYS.append(Polygon([(self.topleft),(self.bottomleft),(self.topright),(self.bottomright)]))        
+            TAKEN_POINTS_POLYS.append(Polygon([
+                (self.topleft[0]-IMAGE_PADDING, self.topleft[1]-IMAGE_PADDING),
+                (self.bottomleft[0]-IMAGE_PADDING, self.bottomleft[1]+IMAGE_PADDING),
+                (self.topright[0]+IMAGE_PADDING, self.topright[1]-IMAGE_PADDING),
+                (self.bottomright[0]+IMAGE_PADDING, self.topright[1]+IMAGE_PADDING)
+                ]))        
         else:
             self.topleft = ["False", "False"]
 
@@ -58,7 +61,12 @@ class pieceImage:
             self.bottomleft = [self.topleft[0], self.topleft[1] + self.image.height]
             self.topright = [self.topleft[0] + self.image.width, self.topleft[1]]
             self.bottomright = [self.topright[0], self.bottomleft[1]]
-            TAKEN_POINTS_POLYS.append(Polygon([(self.topleft),(self.bottomleft),(self.topright),(self.bottomright)]))
+            TAKEN_POINTS_POLYS.append(Polygon([
+                (self.topleft[0]+IMAGE_PADDING, self.topleft[1]+IMAGE_PADDING),
+                (self.bottomleft[0]+IMAGE_PADDING, self.bottomleft[1]-IMAGE_PADDING),
+                (self.topright[0]-IMAGE_PADDING, self.topright[1]+IMAGE_PADDING),
+                (self.bottomright[0]-IMAGE_PADDING, self.topright[1]-IMAGE_PADDING)
+                ]))  
             print("Appending to TAKEN_POINTS_POLYS for",self.name)
 
 
